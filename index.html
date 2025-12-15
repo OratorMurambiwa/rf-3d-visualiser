@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RF Spectrum 3D Explorer</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0f14;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      }
+      #app {
+        height: 100%;
+        width: 100%;
+      }
+      .overlay {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        padding: 10px 12px;
+        background: rgba(0,0,0,0.55);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 10px;
+        font-size: 13px;
+        line-height: 1.35;
+        z-index: 10;
+        max-width: 360px;
+      }
+      .overlay b { font-weight: 650; }
+      .overlay code {
+        background: rgba(255,255,255,0.08);
+        padding: 1px 4px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay">
+      <b>RF Spectrum 3D Explorer</b><br/>
+      Rotate: drag • Zoom: scroll • Pan: right-drag<br/>
+      Data loads from <code>/data/meta.json</code> and <code>/data/power_u8.bin</code>
+    </div>
+
+    <div id="app"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
