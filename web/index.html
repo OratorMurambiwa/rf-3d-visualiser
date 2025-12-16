@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RF Spectrum 3D Explorer</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0f14;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      }
+
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #dashboard {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        width: 380px;
+        background: rgba(10, 14, 20, 0.86);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        padding: 12px 12px 10px;
+        color: #e7eef7;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        z-index: 10;
+      }
+
+      #dashboard h1 {
+        font-size: 14px;
+        margin: 0 0 6px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      #dashboard .hint {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+        line-height: 1.35;
+      }
+
+      #dashboard label {
+        display: block;
+        font-size: 12px;
+        opacity: 0.9;
+        margin: 10px 0 6px;
+      }
+
+      .inlineRow {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .pill {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.14);
+        padding: 6px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+      }
+
+      input[type="file"] {
+        width: 100%;
+        font-size: 12px;
+        color: #e7eef7;
+      }
+
+      input[type="range"] {
+        width: 160px;
+      }
+
+      select {
+        background: rgba(255,255,255,0.08);
+        color: #e7eef7;
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 10px;
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      button {
+        cursor: pointer;
+        font-size: 12px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(230, 184, 0, 0.95);
+        color: #111;
+        font-weight: 800;
+      }
+
+      button.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e7eef7;
+        font-weight: 650;
+      }
+
+      #status {
+        margin-top: 10px;
+        font-size: 12px;
+        opacity: 0.95;
+        line-height: 1.35;
+      }
+
+      #readout {
+        margin-top: 8px;
+        font-size: 12px;
+        opacity: 0.95;
+        line-height: 1.35;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        padding-top: 8px;
+      }
+
+      code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+
+      .layerRow {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .layerItem {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin: 0;
+      }
+
+      .layerItem span {
+        font-size: 12px;
+      }
+
+      .modeBox {
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app"></div>
+
+    <div id="dashboard">
+      <h1>RF Spectrum 3D Explorer</h1>
+      <div class="hint">
+        Two modes:
+        <b>Single Image</b> = detailed 2D surface + hover readout.
+        <br />
+        <b>Multi-Image Compare</b> = compare many images as stacked slices.
+        <br />
+        (Rotate: drag · Zoom: scroll · Pan: right-drag)
+      </div>
+
+      <label>Mode</label>
+      <div class="inlineRow">
+        <label class="pill">
+          <input type="radio" name="mode" id="modeSingle" checked />
+          <span>Single Image</span>
+        </label>
+        <label class="pill">
+          <input type="radio" name="mode" id="modeMulti" />
+          <span>Multi-Image Compare</span>
+        </label>
+      </div>
+
+      <div class="modeBox" id="singleBox">
+        <label for="singleFile">Upload one spectrogram image</label>
+        <input id="singleFile" type="file" accept="image/*" />
+        <label>Detail level (downsample)</label>
+        <div class="inlineRow">
+          <span class="pill"><span>Low</span></span>
+          <input id="singleDownsample" type="range" min="1" max="8" value="3" />
+          <span class="pill"><span>High</span></span>
+        </div>
+        <div class="hint" style="margin-top:8px;">
+          Downsample helps performance for large images. Lower = more detail.
+        </div>
+      </div>
+
+      <div class="modeBox hidden" id="multiBox">
+        <label for="multiFiles">Upload multiple spectrogram images</label>
+        <input id="multiFiles" type="file" accept="image/*" multiple />
+
+        <label>Row sampled from each image</label>
+        <div class="inlineRow">
+          <select id="rowMode">
+            <option value="middle" selected>Middle row</option>
+            <option value="top">Top row</option>
+            <option value="bottom">Bottom row</option>
+          </select>
+          <span class="hint" style="margin:0;">(fast compare view)</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="analyzeBtn" type="button">Analyze</button>
+        <button id="loadSampleBtn" type="button" class="secondary">
+          Load sample from <code>/data</code>
+        </button>
+      </div>
+
+      <label style="margin-top: 12px;">Layers</label>
+      <div class="layerRow">
+        <label class="layerItem">
+          <input id="toggleSurface" type="checkbox" checked />
+          <span>Surface</span>
+        </label>
+
+        <label class="layerItem">
+          <input id="toggleAxes" type="checkbox" checked />
+          <span>Axes</span>
+        </label>
+
+        <label class="layerItem">
+          <input id="toggleLabels" type="checkbox" checked />
+          <span>Labels</span>
+        </label>
+      </div>
+
+      <div id="status">Ready.</div>
+      <div id="readout">Hover over the surface to see values.</div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "shape": {
+    "time": 5,
+    "height": 446,
+    "width": 856
+  },
+  "dtype": "uint8",
+  "value_range": [
+    0,
+    255
+  ],
+  "source": {
+    "input_dir": "..\\data_raw\\images\\morse",
+    "reference_image": "048479425d604bec42365666683a210b.jpg",
+    "used_images": [
+      "048479425d604bec42365666683a210b.jpg",
+      "052798da775fc84535234a2a18321c31.jpg",
+      "06814fb2cbc39b1f6e27385bccf0578b.jpg",
+      "0e3dba65f14fc394902d50a1d5cda58b.jpg",
+      "11bcc1d9df36daa42ca01de84d346a23.jpg"
+    ]
+  },
+  "axes": {
+    "x": "frequency_bins (image width)",
+    "z": "time (image index + row index)",
+    "y": "power (pixel intensity)"
+  }
+}

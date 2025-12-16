@@ -1,0 +1,24 @@
+## Node/Vite artifacts
+web/node_modules/
+web/dist/
+web/.vite/
+*.log
+
+## Environment files
+.env
+.env.*
+
+## Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+## Data outputs
+data_raw/
+
+## Editor/OS clutter
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
