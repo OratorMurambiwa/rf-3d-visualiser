@@ -5,20 +5,12 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-
 """
-This script converts RF waterfall / spectrogram images into numeric data
-that can be rendered as a 3D surface in the browser.
-
 Images -> grayscale numbers (0–255)
 width  -> frequency axis
 height -> time axis (within each image)
 time   -> image index (stacked slices)
 pixel  -> signal power (intensity)
-
-Output:
-- power_u8.bin  (flat uint8 array)
-- meta.json     (shape + meaning)
 """
 
 
@@ -30,7 +22,6 @@ def load_image_as_u8(path: Path, target_size: tuple[int, int] | None) -> np.ndar
     img = Image.open(path).convert("L")
 
     if target_size is not None:
-        # target_size is (width, height)
         img = img.resize(target_size, Image.BILINEAR)
 
     arr = np.asarray(img, dtype=np.uint8)
@@ -41,8 +32,6 @@ def main(input_dir: Path, output_dir: Path, max_images: int):
     if not input_dir.exists():
         raise RuntimeError(f"Input directory does not exist: {input_dir}")
 
-    # Some datasets store images without file extensions.
-    # We grab all files and let PIL decide if it can open them.
     candidates = sorted([p for p in input_dir.rglob("*") if p.is_file()])
 
     if not candidates:
@@ -65,11 +54,11 @@ def main(input_dir: Path, output_dir: Path, max_images: int):
             "Your folder may contain non-image files or corrupted images."
         )
 
-    target_size = reference_img.size  # (width, height)
+    target_size = reference_img.size 
     print(f"Reference image: {reference_path.name}")
     print(f"Target size (width, height): {target_size}")
 
-    # Now load up to max_images valid images, resized to target_size.
+    # resize to target_size.
     slices = []
     used_paths = []
 
@@ -82,7 +71,6 @@ def main(input_dir: Path, output_dir: Path, max_images: int):
             slices.append(arr)
             used_paths.append(p)
         except Exception:
-            # Skip anything PIL can't read as an image
             continue
 
     if not slices:
@@ -91,13 +79,11 @@ def main(input_dir: Path, output_dir: Path, max_images: int):
     print(f"Using {len(slices)} images")
 
     # Stack images along time axis
-    # Result shape: (time, height, width)
     volume = np.stack(slices, axis=0)
 
     T, H, W = volume.shape
     print(f"Volume shape: time={T}, height={H}, width={W}")
 
-    # Flatten to (time * height * width)
     flat = volume.reshape(-1)
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -106,7 +92,7 @@ def main(input_dir: Path, output_dir: Path, max_images: int):
     bin_path = output_dir / "power_u8.bin"
     flat.tofile(bin_path)
 
-    # Metadata for the viewer
+    # Metadata 
     meta = {
         "shape": {"time": int(T), "height": int(H), "width": int(W)},
         "dtype": "uint8",
